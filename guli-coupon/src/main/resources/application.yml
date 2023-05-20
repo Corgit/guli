@@ -1,0 +1,118 @@
+# Tomcat
+server:
+  tomcat:
+    uri-encoding: UTF-8
+    max-threads: 1000
+    min-spare-threads: 30
+  port: 8877
+  connection-timeout: 5000ms
+#  servlet:
+#     # context-path为访问应用需要带的资源路径名，此时访问应用前缀应该是 ip:port/context-path，即 server:8877/guli-coupon
+#    context-path: /guli-coupon
+
+spring:
+  # 环境 dev|test|prod
+  profiles:
+    active: dev
+  # jackson时间格式化
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+      enabled: true
+  redis:
+    open: false  # 是否开启redis缓存  true开启   false关闭
+    database: 0
+#    host: localhost
+    host: 192.168.56.10
+    port: 6379
+    password:    # 密码（默认为空）
+    timeout: 6000ms  # 连接超时时长（毫秒）
+    jedis:
+      pool:
+        max-active: 1000  # 连接池最大连接数（使用负值表示没有限制）
+        max-wait: -1ms      # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-idle: 10      # 连接池中的最大空闲连接
+        min-idle: 5       # 连接池中的最小空闲连接
+  mvc:
+    throw-exception-if-no-handler-found: true
+#  resources:
+#    add-mappings: false
+  # nacos 配置
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+  # 应用名
+  application:
+    name: guli-coupon
+
+# mybatis
+mybatis-plus:
+  # 配置mapper文件的位置
+  mapper-locations: classpath*:/mapper.coupon/*.xml
+  #实体扫描，多个package用逗号或者分号分隔
+  type-aliases-package: com.guli.coupon.entity
+  global-config:
+    #数据库相关配置
+    db-config:
+      #主键类型  AUTO:"数据库ID自增", INPUT:"用户输入ID", ID_WORKER:"全局唯一ID (数字类型唯一ID)", UUID:"全局唯一ID UUID", ASSIGN_ID:"雪花算法ID";
+      id-type: ASSIGN_ID
+      # 逻辑删除字段
+      logic-delete-field: valid
+      # 逻辑删除合法值
+      logic-delete-value: 0
+      logic-not-delete-value: 1
+      # 驼峰转换
+      column-underline: true
+    banner: false
+  #原生配置
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    call-setters-on-nulls: true
+    jdbc-type-for-null: 'null'
+    # 打印输出SQL语句
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+renren:
+  redis:
+    open: false
+  shiro:
+    redis: false
+  # APP模块，是通过jwt认证的，如果要使用APP模块，则需要修改【加密秘钥】
+  jwt:
+    # 加密秘钥
+    secret: f4e2e52034348f86b67cde581c0f9eb5[www.renren.io]
+    # token有效时长，7天，单位秒
+    expire: 604800
+    header: token
+
+coupon:
+  user:
+    size: 18
+
+## gateway的配置以spring.cloud.gateway打头
+#spring:
+#  cloud:
+#    gateway:
+#      # routes项和predicates项的配置值是一个数组list
+#      # yml文件中数组的写法是短横杠+空格+配置项+冒号+赋值
+#      # 一个route由id、uri、predicate、filter组成，一次数组的一个元素也含有四项
+#      routes:
+#        # id是route的唯一标识，自定义
+#        - id: test_route_01
+#          # 将路由到的地址
+#          uri: https://baidu.com
+#          # 判断条件，gateway指定满足某几个断言，其中Query是一种，其他查阅官方手册
+#          predicates:
+#            # 意为：请求在Query断言之下，满足kv对key为url，value为baidu时，可以路由
+#            # url是请求里的参数名，baidu是该参数的值，参数值是正则匹配的
+#            # 如请求 gateway_server_ip:port?url=baiduuuu 会被路由成功到uri地址
+#            - Query=url, baidu
+#        - id: test_route_02
+#          uri: https://test.com

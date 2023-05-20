@@ -15,6 +15,9 @@
         <module>guli-member</module>
         <module>guli-orders</module>
         <module>guli-product</module>
+        <module>guli-common</module>
+        <module>guli-seckill</module>
+        <module>guli-gateway</module>
     </modules>
 
 
