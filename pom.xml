@@ -18,6 +18,7 @@
         <module>guli-common</module>
         <module>guli-seckill</module>
         <module>guli-gateway</module>
+        <module>guli-search</module>
     </modules>
 
 

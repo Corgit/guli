@@ -1,0 +1,21 @@
+
+spring:
+  # nacos
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+  # 应用名
+  application:
+    name: guli-search
+
+# 端口
+server:
+  port: 8800
+
+# Elastic Search
+es:
+  server:
+    host: 192.168.56.10
+    port: 9200
+    scheme: http
