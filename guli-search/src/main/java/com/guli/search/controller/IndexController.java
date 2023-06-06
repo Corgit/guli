@@ -23,7 +23,7 @@ import java.io.IOException;
  * @Author: Ryan_Wuyx
  * @Date: 2023/6/2 10:27
  */
-@RequestMapping("/search")
+@RequestMapping("/search/index")
 @RestController
 public class IndexController {
 
