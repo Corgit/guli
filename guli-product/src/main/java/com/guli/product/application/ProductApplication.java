@@ -12,7 +12,7 @@ import org.springframework.context.annotation.ComponentScan;
  * @author: Ryan_Wu
  * @Date: 2022/3/21 10:25
  */
-@EnableFeignClients
+@EnableFeignClients(basePackages = "com.guli.product.**")
 @SpringBootApplication
 @ComponentScan(basePackages = "com.guli.**")
 @EnableDiscoveryClient

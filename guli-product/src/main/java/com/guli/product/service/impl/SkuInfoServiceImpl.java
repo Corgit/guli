@@ -2,7 +2,10 @@ package com.guli.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.guli.product.feign.SearchFeign;
 import com.guli.product.vo.AddressVo;
+import com.guli.product.vo.EsAddrVo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +25,9 @@ import com.guli.product.service.SkuInfoService;
 
 @Service("skuInfoService")
 public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> implements SkuInfoService {
+
+    @Autowired
+    private SearchFeign searchFeign;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -56,5 +62,28 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
             ).collect(Collectors.toList());
             this.saveBatch(list);
         }
+    }
+
+    @Override
+    public void toEsHistory() {
+
+        // 查出所有数据，封装实体
+        List<SkuInfoEntity> entities = this.list(new LambdaQueryWrapper<SkuInfoEntity>()
+                .select(SkuInfoEntity::getSkuId, SkuInfoEntity::getSkuDefaultImg,
+                        SkuInfoEntity::getSkuDesc, SkuInfoEntity::getSkuName));
+        if(entities != null && entities.size() > 0) {
+            List<EsAddrVo> collect = entities.stream().map(e -> {
+                EsAddrVo es = new EsAddrVo();
+                es.setDistrict(e.getSkuDefaultImg());
+                es.setFulladdr(e.getSkuDesc());
+                es.setId(e.getSkuId());
+                es.setStreet(e.getSkuName());
+                return es;
+            }).collect(Collectors.toList());
+
+            // 发送到search服务
+            searchFeign.toEsBatch(collect);
+        }
+
     }
 }

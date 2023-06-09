@@ -1,7 +1,9 @@
 package com.guli.search.config;
 
 import org.apache.http.HttpHost;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,10 +24,29 @@ public class GuliEsConfig {
     private String esScheme;
 
     // 在容器中后放入一个client，集群时放入多个HttpHost
+//    @Bean
+//    public RestClient generateEsClient() {
+//        RestClient restClient = RestClient.builder(
+//                new HttpHost(esHost, esPort, esScheme)).build();
+//        return restClient;
+//    }
+
     @Bean
-    public RestClient generateEsClient() {
-        RestClient restClient = RestClient.builder(
-                new HttpHost(esHost, esPort, esScheme)).build();
-        return restClient;
+    public RestHighLevelClient generateHighClient() {
+        RestHighLevelClient client = new RestHighLevelClient(
+                RestClient.builder(
+                        new HttpHost(esHost, esPort, esScheme)));
+        return client;
     }
+
+    public static final RequestOptions COMMON_OPTIONS;
+    static {
+        RequestOptions.Builder builder = RequestOptions.DEFAULT.toBuilder();
+//        builder.addHeader("Authorization", "Bearer " + TOKEN);
+//        builder.setHttpAsyncResponseConsumerFactory(
+//                new HttpAsyncResponseConsumerFactory
+//                        .HeapBufferedResponseConsumerFactory(30 * 1024 * 1024 * 1024));
+        COMMON_OPTIONS = builder.build();
+    }
+
 }

@@ -48,9 +48,22 @@ public class SkuInfoController {
     }
 
     @ApiOperation("一次性将ES数据存入MySQL")
-    @PostMapping("/batch/es")
+    @PostMapping("/es/batch")
     public R batchUpdateEs(@RequestBody List<AddressVo> vos) {
         skuInfoService.esHistoryUpdate(vos);
+        return null;
+    }
+
+    @ApiOperation("一次性将MySQL数据存入ES")
+    @GetMapping("/es/to")
+    public R toEsHistory() {
+        skuInfoService.toEsHistory();
+        return null;
+    }
+
+    @ApiOperation("新增SK信息")
+    @PostMapping("/insert")
+    public R newSku() {
         return null;
     }
 

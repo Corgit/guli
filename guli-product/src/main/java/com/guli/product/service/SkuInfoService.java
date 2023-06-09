@@ -22,5 +22,7 @@ public interface SkuInfoService extends IService<SkuInfoEntity> {
     SkuInfoEntity querySkuInfoById(Long id);
 
     void esHistoryUpdate(List<AddressVo> vos);
+
+    void toEsHistory();
 }
 
