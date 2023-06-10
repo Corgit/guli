@@ -1,6 +1,7 @@
 package com.guli.search.controller;
 
 import com.guli.common.utils.R;
+import com.guli.search.ao.SuggesterAo;
 import com.guli.search.service.SuggestService;
 import com.guli.search.vo.EsAddrVo;
 import io.swagger.annotations.Api;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description：
@@ -41,6 +43,15 @@ public class SuggestController {
     public R toEsBatch(@RequestBody List<EsAddrVo> vos) {
         if(vos != null && vos.size() > 0) {
             suggestService.batchToEs(vos);
+        }
+        return null;
+    }
+
+    @ApiOperation("通用自动补全接口")
+    @PostMapping("/auto")
+    public R esSuggester(@RequestBody SuggesterAo ao) {
+        if (ao != null) {
+            return R.ok().put("data", suggestService.getSuggests(ao));
         }
         return null;
     }

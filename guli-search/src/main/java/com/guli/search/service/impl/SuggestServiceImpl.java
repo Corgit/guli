@@ -5,16 +5,19 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.guli.search.ao.SuggesterAo;
 import com.guli.search.config.GuliEsConfig;
 import com.guli.search.entity.EsResponseEntity;
 import com.guli.search.entity.SubHits;
 import com.guli.search.entity.Tokens;
+import com.guli.search.enums.SuggesterEnums;
 import com.guli.search.feign.ProductFeign;
 import com.guli.search.service.SuggestService;
 import com.guli.search.vo.AddressVO;
 import com.guli.search.vo.EsAddrVo;
 import com.guli.search.vo.EsAddressVo;
 import com.guli.search.vo.TokensVo;
+import com.sun.xml.internal.ws.api.ha.StickyFeature;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
@@ -23,9 +26,17 @@ import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequestBuilder;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.*;
 import org.elasticsearch.client.indices.AnalyzeRequest;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.suggest.Suggest;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.SuggestionBuilder;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -194,4 +205,67 @@ public class SuggestServiceImpl implements SuggestService {
             return  null;
         }
     }
+
+    /**
+     * POST address/_search
+     * {
+     *     "suggest": {
+     *         "address-suggest" : {
+     *             "text" : "馨",
+     *             "completion" : {
+     *                 "field" : "suggest",
+     *                 "size" : 10
+     *             }
+     *         }
+     *     },
+     *     "_source": "fulladdr"
+     * }
+     */
+    @Override
+    public List<Map<String, String>> getSuggests(SuggesterAo ao) {
+        List<Map<String, String>> list = new ArrayList<>();
+        Map<String, String> map = new HashMap<>();
+        if (ao.getClient() != null && ao.getInput() != null) {
+            // 自内而外的封装请求参数
+            CompletionSuggestionBuilder completionBuilder = new CompletionSuggestionBuilder("suggest");
+            completionBuilder.size(10);
+            completionBuilder.text(ao.getInput());
+            SuggestBuilder suggestBuilder = new SuggestBuilder();
+            suggestBuilder.addSuggestion(ao.getClient() + "-suggest", completionBuilder);
+
+            SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+            sourceBuilder.suggest(suggestBuilder);
+            SuggesterEnums suggestEnum = SuggesterEnums.valueOf(ao.getClient().toUpperCase());
+            sourceBuilder.fetchSource(suggestEnum.getIncludes(), suggestEnum.getExcludes());
+            SearchRequest search = new SearchRequest(suggestEnum.getIndices());
+            search.source(sourceBuilder);
+            try {
+                // 结果提取
+                SearchResponse response = highLevelClient.search(search, GuliEsConfig.COMMON_OPTIONS);
+                JSONObject suggest = JSONObject.parseObject(response.getSuggest().toString());
+                JSONArray array = suggest.getJSONObject("suggest").getJSONArray(ao.getClient() + "-suggest");
+                JSONArray options = JSONObject.parseObject(array.get(0).toString()).getJSONArray("options");
+                if(options != null && options.size() > 0) {
+                    for (Object o : options) {
+                        JSONObject jsonObject = JSONObject.parseObject(o.toString());
+                        String id = jsonObject.get("_id").toString();
+                        map.put("id", id);
+                        String source = jsonObject.getJSONObject("_source").toJSONString();
+                        map.put("suggest", source);
+                        list.add(map);
+                        }
+                    return list;
+                }
+                return list;
+            } catch (Exception e) {
+                log.info("Suggester异常 >>>>> " + e);
+                return null;
+            }
+        } else {
+            map.put("msg", "参数不能为空！");
+            list.add(map);
+            return list;
+        }
+    }
+
 }
