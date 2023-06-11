@@ -224,9 +224,8 @@ public class SuggestServiceImpl implements SuggestService {
     @Override
     public List<Map<String, String>> getSuggests(SuggesterAo ao) {
         List<Map<String, String>> list = new ArrayList<>();
-        Map<String, String> map = new HashMap<>();
         if (ao.getClient() != null && ao.getInput() != null) {
-            // 自内而外的封装请求参数
+            // 使用search API，自内而外的封装请求参数
             CompletionSuggestionBuilder completionBuilder = new CompletionSuggestionBuilder("suggest");
             completionBuilder.size(10);
             completionBuilder.text(ao.getInput());
@@ -240,19 +239,19 @@ public class SuggestServiceImpl implements SuggestService {
             SearchRequest search = new SearchRequest(suggestEnum.getIndices());
             search.source(sourceBuilder);
             try {
-                // 结果提取
+                // 发起请求，处理返回的JSON字符串
                 SearchResponse response = highLevelClient.search(search, GuliEsConfig.COMMON_OPTIONS);
                 JSONObject suggest = JSONObject.parseObject(response.getSuggest().toString());
                 JSONArray array = suggest.getJSONObject("suggest").getJSONArray(ao.getClient() + "-suggest");
                 JSONArray options = JSONObject.parseObject(array.get(0).toString()).getJSONArray("options");
+                // 提取结果集的id和source字段
                 if(options != null && options.size() > 0) {
                     for (Object o : options) {
                         JSONObject jsonObject = JSONObject.parseObject(o.toString());
-                        String id = jsonObject.get("_id").toString();
-                        map.put("id", id);
                         String source = jsonObject.getJSONObject("_source").toJSONString();
-                        map.put("suggest", source);
-                        list.add(map);
+                        Map<String, String> resultMap = JSONObject.parseObject(source).toJavaObject(new TypeReference<Map<String, String>>(){});
+                        resultMap.put("id", jsonObject.get("_id").toString());
+                        list.add(resultMap);
                         }
                     return list;
                 }
@@ -262,6 +261,7 @@ public class SuggestServiceImpl implements SuggestService {
                 return null;
             }
         } else {
+            Map<String, String> map = new HashMap<>();
             map.put("msg", "参数不能为空！");
             list.add(map);
             return list;
