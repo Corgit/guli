@@ -68,8 +68,11 @@ public class SuggestServiceImpl implements SuggestService {
     @Autowired
     private ProductFeign productFeign;
 
+    /**
+     * 从ES里面批量查询数据，存入product数据库
+     */
     @Override
-    public void historyBatchUpdate() throws IOException {
+    public void historyBatchUpdateFromEs() throws IOException {
 
         // 使用_search endpoint查出index rainhall下所有数据
         // GET /rainhall/_search
@@ -103,6 +106,9 @@ public class SuggestServiceImpl implements SuggestService {
         productFeign.batchUpdateEs(vos);
     }
 
+    /**
+     * 将数据批量存入ES
+     */
     @Override
     public void batchToEs(List<EsAddrVo> vos) {
         if(vos != null && vos.size() > 0) {
@@ -207,6 +213,8 @@ public class SuggestServiceImpl implements SuggestService {
     }
 
     /**
+     * 根据用户输入返回10条搜索建议词
+     *
      * POST address/_search
      * {
      *     "suggest": {

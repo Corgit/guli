@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public interface SuggestService {
 
-    void historyBatchUpdate() throws IOException;
+    void historyBatchUpdateFromEs() throws IOException;
 
     void batchToEs(List<EsAddrVo> vos);
 

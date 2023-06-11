@@ -31,7 +31,7 @@ public class SuggestController {
     @GetMapping("/history")
     public R historyUpdate() {
         try{
-            suggestService.historyBatchUpdate();
+            suggestService.historyBatchUpdateFromEs();
         }catch(Exception e){
             log.info(e.toString());
         }
