@@ -32,7 +32,9 @@
         <swagger2.bootstrap.version>1.9.6</swagger2.bootstrap.version>
         <hutool.core.version>5.7.22</hutool.core.version>
         <hutool.poi.version>5.7.22</hutool.poi.version>
+        <hutool.extra.version>5.7.22</hutool.extra.version>
         <apache.poi.version>5.2.2</apache.poi.version>
+        <com.google.zxing.version>3.3.3</com.google.zxing.version>
         <spring.cloud.feign.version>2.2.6.RELEASE</spring.cloud.feign.version>
         <spring.cloud.nacos.discovery.version>2.2.7.RELEASE</spring.cloud.nacos.discovery.version>
         <spring.cloud.nacos.config.version>2.2.7.RELEASE</spring.cloud.nacos.config.version>
@@ -191,9 +193,23 @@
         </dependency>
 
         <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-extra</artifactId>
+            <version>${hutool.extra.version}</version>
+        </dependency>
+
+        <!-- Office poi -->
+        <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>${apache.poi.version}</version>
+        </dependency>
+
+        <!-- QRCode zxing -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>${com.google.zxing.version}</version>
         </dependency>
 
         <!-- nacos服务发现组件，注意与springboot版本对应，切线引入springcloud Alibaba组件 -->
